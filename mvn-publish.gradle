@@ -15,6 +15,7 @@
  */
  
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 def isReleaseBuild() {
     return VERSION_NAME.contains("SNAPSHOT") == false
@@ -86,6 +87,10 @@ publishing {
 
     repositories {
         maven {
+                credentials {
+                    username getRepositoryUsername()
+                    password getRepositoryPassword()
+                }
                 if(isReleaseBuild()) {
                     url getReleaseRepositoryUrl()
                 } else {
