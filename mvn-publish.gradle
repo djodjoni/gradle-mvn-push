@@ -55,7 +55,7 @@ task signJars (type : Sign, dependsOn: [jar, javadocJar, sourceJar]) {
 }
 // sign pom
 task signPom(type: Sign) {
-    sign configurations.pom
+   // sign configurations.pom
 }
 
 signing {
