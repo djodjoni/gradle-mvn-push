@@ -50,9 +50,7 @@ task javadocJar(type: Jar, dependsOn: javadocs) {
 }
 
 // sign all artifacts
-task signJars (type : Sign) {
-    classifier = signature.classifier
-    extension  = signature.extension
+task signJars (type : Sign, dependsOn: [jar, javadocJar, sourceJar]) {
     sign configurations.archives
 }
 // sign pom
@@ -67,14 +65,32 @@ signing {
     sign configurations.archives
 }
 
+def getSignatureFiles = {
+    def allFiles = project.tasks.signJars.signatureFiles.collect { it }
+    def signedSources = allFiles.find { it.name.contains('-sources') }
+    def signedJavadoc = allFiles.find { it.name.contains('-javadoc') }
+    def signedJar = (allFiles - [signedSources, signedJavadoc])[0]
+    return [
+            [archive: signedSources, classifier: 'sources', extension: 'jar.asc'],
+            [archive: signedJavadoc, classifier: 'javadoc', extension: 'jar.asc'],
+            [archive: signedJar,     classifier: null,      extension: 'jar.asc']
+    ]
+}
+
+
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
             artifact sourceJar
             artifact javadocJar
-            artifact signJars
-            artifact signPom
+            getSignatureFiles().each {signature ->
+                artifact (signature.archive) {
+                    classifier = signature.classifier
+                    extension  = signature.extension
+                }
+            }
+
             groupId GROUP
             artifactId = POM_ARTIFACT_ID
             version VERSION_NAME
