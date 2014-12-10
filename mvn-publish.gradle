@@ -50,7 +50,7 @@ task javadocsJar(type: Jar, dependsOn: javadocs) {
 }
 
 // sign all artifacts
-task signJars (type : Sign, dependsOn: [jar, javadocJar, sourceJar]) {
+task signJars (type : Sign, dependsOn: [jar, javadocsJar, sourceJar]) {
     classifier = signature.classifier
     extension  = signature.extension
     sign configurations.archives
