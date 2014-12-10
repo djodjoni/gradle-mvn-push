@@ -55,8 +55,6 @@ task signJars (type : Sign, dependsOn: [jar, javadocJar, sourceJar]) {
 }
 // sign pom
 task signPom(type: Sign) {
-    classifier = null
-    extension  = 'pom.asc'
     sign configurations.pom
 }
 
