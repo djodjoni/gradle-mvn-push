@@ -49,6 +49,19 @@ task javadocsJar(type: Jar, dependsOn: javadocs) {
     from javadocs.destinationDir
 }
 
+// sign all artifacts
+task signJars (type : Sign, dependsOn: [jar, javadocJar, sourceJar]) {
+    classifier = signature.classifier
+    extension  = signature.extension
+    sign configurations.archives
+}
+// sign pom
+task signPom(type: Sign) {
+    classifier = null
+    extension  = 'pom.asc'
+    sign configurations.pom
+}
+
 signing {
     required { isReleaseBuild() && gradle.taskGraph.hasTask("publishMavenPublicationToMavenRepository") }
     sign configurations.archives
@@ -60,6 +73,8 @@ publishing {
             from components.java
             artifact sourceJar
             artifact javadocsJar
+            artifact signJars
+            artifact signPom
             groupId GROUP
             artifactId = POM_ARTIFACT_ID
             version VERSION_NAME
