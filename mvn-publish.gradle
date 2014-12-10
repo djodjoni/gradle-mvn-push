@@ -49,6 +49,11 @@ task javadocsJar(type: Jar, dependsOn: javadocs) {
     from javadocs.destinationDir
 }
 
+signing {
+    required { isReleaseBuild() && gradle.taskGraph.hasTask("publish") }
+    sign configurations.archives
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -78,9 +83,6 @@ publishing {
                 def developerNode = asNode().appendNode('developers').appendNode('developer')
                 developerNode.appendNode('id', POM_DEVELOPER_ID)
                 developerNode.appendNode('name', POM_DEVELOPER_NAME)
-
-
-
             }
         }
     }
