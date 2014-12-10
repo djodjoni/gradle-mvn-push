@@ -53,10 +53,6 @@ task javadocJar(type: Jar, dependsOn: javadocs) {
 task signJars (type : Sign, dependsOn: [jar, javadocJar, sourceJar]) {
     sign configurations.archives
 }
-// sign pom
-task signPom(type: Sign) {
-   // sign configurations.pom
-}
 
 signing {
     required { isReleaseBuild() && gradle.taskGraph.hasTask("publishMavenPublicationToMavenRepository") }
