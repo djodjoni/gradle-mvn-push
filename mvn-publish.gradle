@@ -34,12 +34,10 @@ def getRepositoryUsername() {
 def getRepositoryPassword() {
     return hasProperty('NEXUS_PASSWORD') ? NEXUS_PASSWORD : ""
 }
-
 task sourceJar(type: Jar) {
     classifier "sources"
     from sourceSets.main.allSource
 }
-
 task javadocs(type: Javadoc) {
     source = sourceSets.main.allJava
 }
@@ -49,80 +47,72 @@ task javadocJar(type: Jar, dependsOn: javadocs) {
     from javadocs.destinationDir
 }
 
-// sign all artifacts
-task signJars (type : Sign, dependsOn: [jar, javadocJar, sourceJar]) {
-    sign configurations.archives
+afterEvaluate { project ->
+
+    signing {
+        required {tasks.generatePomFileForMavenPublication && isReleaseBuild() && gradle.taskGraph.hasTask("publishMavenPublicationToMavenRepository") }
+        sign configurations.archives
+        sign javadocJar
+        sign sourceJar
+        sign("${buildDir}/publications/maven/pom-default.xml")
+    }
 }
-
-signing {
-    required { isReleaseBuild() && gradle.taskGraph.hasTask("publishMavenPublicationToMavenRepository") }
-    sign configurations.archives
-}
-
-def getSignatureFiles = {
-    def allFiles = project.tasks.signJars.signatureFiles.collect { it }
-    def signedSources = allFiles.find { it.name.contains('-sources') }
-    def signedJavadoc = allFiles.find { it.name.contains('-javadoc') }
-    def signedJar = (allFiles - [signedSources, signedJavadoc])[0]
-    return [
-            [archive: signedSources, classifier: 'sources', extension: 'jar.asc'],
-            [archive: signedJavadoc, classifier: 'javadoc', extension: 'jar.asc'],
-            [archive: signedJar,     classifier: null,      extension: 'jar.asc']
-    ]
-}
-
-
 publishing {
     publications {
         maven(MavenPublication) {
             from components.java
             artifact sourceJar
             artifact javadocJar
-            getSignatureFiles().each {signature ->
-                artifact (signature.archive) {
-                    classifier = signature.classifier
-                    extension  = signature.extension
-                }
+            artifact("${buildDir}/libs/${project.name}-javadoc.jar.asc") {
+                classifier 'javadoc'
+                extension 'jar.asc'
+            }
+            artifact("${buildDir}/libs/${project.name}-sources.jar.asc") {
+                classifier 'sources'
+                extension 'jar.asc'
+            }
+            artifact("${buildDir}/libs/${project.name}.jar.asc") {
+                classifier null
+                extension 'jar.asc'
+            }
+            artifact("${buildDir}/publications/maven/pom-default.xml.asc") {
+                classifier null
+                extension 'pom.asc'
             }
 
             groupId GROUP
             artifactId = POM_ARTIFACT_ID
             version VERSION_NAME
-
             pom.packaging POM_PACKAGING
             pom.withXml {
                 asNode().appendNode('name', POM_NAME)
                 asNode().appendNode('description', POM_DESCRIPTION)
                 asNode().appendNode('url', POM_URL)
-
                 def scmNode = asNode().appendNode('scm')
                 scmNode.appendNode('url', POM_SCM_URL)
                 scmNode.appendNode('connection', POM_SCM_CONNECTION)
                 scmNode.appendNode('developerConnection', POM_SCM_DEV_CONNECTION)
-
                 def licenseNode = asNode().appendNode('licenses').appendNode('license')
                 licenseNode.appendNode('name', POM_LICENCE_NAME)
                 licenseNode.appendNode('url', POM_LICENCE_URL)
                 licenseNode.appendNode('distribution', POM_LICENCE_DIST)
-
                 def developerNode = asNode().appendNode('developers').appendNode('developer')
                 developerNode.appendNode('id', POM_DEVELOPER_ID)
                 developerNode.appendNode('name', POM_DEVELOPER_NAME)
             }
         }
     }
-
     repositories {
         maven {
-                credentials {
-                    username getRepositoryUsername()
-                    password getRepositoryPassword()
-                }
-                if(isReleaseBuild()) {
-                    url getReleaseRepositoryUrl()
-                } else {
-                    url getSnapshotRepositoryUrl()
-                }
+            credentials {
+                username getRepositoryUsername()
+                password getRepositoryPassword()
+            }
+            if (isReleaseBuild()) {
+                url getReleaseRepositoryUrl()
+            } else {
+                url getSnapshotRepositoryUrl()
+            }
         }
     }
 }
