@@ -36,10 +36,10 @@ def getRepositoryPassword() {
 }
 task sourceJar(type: Jar) {
     classifier "sources"
-    from sourceSets.main.allSource
+    from android.sourceSets.main.java.sourceFiles
 }
 task javadocs(type: Javadoc) {
-    source = sourceSets.main.allJava
+    source = android.sourceSets.main.java.srcDirs
 }
 
 task javadocJar(type: Jar, dependsOn: javadocs) {
