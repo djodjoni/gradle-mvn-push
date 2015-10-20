@@ -94,6 +94,10 @@ afterEvaluate { project ->
 
     task javadocs(type: Javadoc) {
         source = sourceSets.main.allJava
+        classpath += configurations.compile
+        if (JavaVersion.current().isJava8Compatible()) {
+            options.addStringOption('Xdoclint:none', '-quiet')
+        }
     }
 
     task javadocsJar(type: Jar, dependsOn: javadocs) {
