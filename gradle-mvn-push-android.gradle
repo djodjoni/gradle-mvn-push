@@ -101,12 +101,12 @@ afterEvaluate { project ->
         }
     }
 
-    task javadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    task javadocsJar(type: Jar, dependsOn: javadocs) {
         classifier = 'javadoc'
-        from androidJavadocs.destinationDir
+        from javadocs.destinationDir
     }
 
-    task javadocsJar(type: Jar) {
+    task sourcesJar(type: Jar) {
         classifier = 'sources'
         from android.sourceSets.main.java.sourceFiles
     }
