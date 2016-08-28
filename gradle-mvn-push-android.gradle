@@ -112,7 +112,7 @@ afterEvaluate { project ->
     }
 
     artifacts {
-        archives androidSourcesJar
-        archives androidJavadocsJar
+        archives sourcesJar
+        archives javadocsJar
     }
 }
