@@ -109,6 +109,11 @@ afterEvaluate { project ->
         classifier = 'sources'
         from sourceSets.main.allSource
     }
+    
+    task publishJavaDoc(type: Copy, dependsOn: javadocs) {
+        from javadocs.destinationDir
+        into(rootProject.projectDir.absolutePath+'/docs/' + VERSION_NAME)
+    }
 
     artifacts {
         archives sourcesJar
