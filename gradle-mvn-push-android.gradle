@@ -92,7 +92,8 @@ afterEvaluate { project ->
         sign configurations.archives
     }
 
-    task androidJavadocs(type: Javadoc) {
+    task javadocs(type: Javadoc) {
+        source = android.sourceSets.main.java.srcDirs
         classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
 
         if (JavaVersion.current().isJava8Compatible()) {
@@ -100,12 +101,12 @@ afterEvaluate { project ->
         }
     }
 
-    task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    task javadocsJar(type: Jar, dependsOn: androidJavadocs) {
         classifier = 'javadoc'
         from androidJavadocs.destinationDir
     }
 
-    task androidSourcesJar(type: Jar) {
+    task javadocsJar(type: Jar) {
         classifier = 'sources'
         from android.sourceSets.main.java.sourceFiles
     }
