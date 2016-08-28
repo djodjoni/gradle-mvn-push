@@ -112,7 +112,7 @@ afterEvaluate { project ->
     
     task publishJavaDoc(type: Copy, dependsOn: javadocs) {
         from javadocs.destinationDir
-        into(rootProject.projectDir.absolutePath+'/docs/' + VERSION_NAME)
+        into(rootProject.projectDir.absolutePath+'/docs/javadoc/' + VERSION_NAME)
     }
 
     artifacts {
